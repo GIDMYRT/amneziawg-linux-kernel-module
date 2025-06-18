@@ -80,17 +80,14 @@ if [[ "${DISTRO_FLAVOR}" =~ debian ]]; then
   apt-get -yq -o APT::Sandbox::User="$(whoami)" source "${PACKAGE_NAME}=${PACKAGE_VERSION}"
   cd_first
 else
-  yumdownloader --source kernel
-  [ -f "${HOME}/.rpmmacros" ] && mv "${HOME}/.rpmmacros" "${HOME}/.rpmmacros.orig"
-  echo "%_topdir $(pwd)" > "${HOME}/.rpmmacros"
-  rpm -ivh "$(ls *.rpm)"
-  cd SPECS || exit 255
-  rpmbuild -bp --target="$(uname -m)" --nodeps kernel.spec
-  rm -rf "${HOME}/.rpmmacros"
-  [ -f "${HOME}/.rpmmacros.orig" ] && mv "${HOME}/.rpmmacros.orig" "${HOME}/.rpmmacros"
-  cd ../BUILD || exit 255
-  cd_first
-  cd_first linux
+  TEMP_DIR=$(mktemp -d -p "${WORKDIR}")
+  yumdownloader --source kernel --downloaddir "${TEMP_DIR}"
+  rpm -ihv --nodb --nodeps -D "_sourcedir %nil" -D "_specdir %nil" --root "${TEMP_DIR}" "${TEMP_DIR}/*.src.rpm"
+  SRC_TAR=$(rpmspec --srpm -q --qf "[%{SOURCE}\n]" "${TEMP_DIR}/kernel.spec" | tail -1)
+  SRC_DIR="${TEMP_DIR}/linux_sources"
+  mkdir -p "${SRC_DIR}"
+  tar -xvf "${TEMP_DIR}/${SRC_TAR}" -C "${SRC_DIR}" --strip-components=1
+  cd "${SRC_DIR}"
 fi
 
 KERNEL_PATH="$(pwd)"
