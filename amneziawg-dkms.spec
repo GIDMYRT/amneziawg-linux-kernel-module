@@ -10,7 +10,7 @@ License:        GPLv2
 Group:          System Environment/Kernel
 BuildArch:      noarch
 
-Source0:        https://github.com/amnezia-vpn/amneziawg-linux-kernel-module/archive/refs/tags/v%{version}.tar.gz
+Source0:        https://github.com/GIDMYRT/amneziawg-linux-kernel-module/archive/refs/tags/v%{version}.tar.gz
 
 BuildRequires:  kernel-devel
 BuildRequires:  sed
